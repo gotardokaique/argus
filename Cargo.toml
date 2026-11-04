@@ -1,0 +1,43 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/core",
+    "crates/scanner",
+    "crates/dns",
+    "crates/service",
+    "crates/cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+license = "GPL-2.0-only"
+publish = false
+
+[workspace.dependencies]
+argus-core = { path = "crates/core" }
+argus-dns = { path = "crates/dns" }
+
+anyhow = "1.0.104"
+arc-swap = "1.9.3"
+clap = { version = "4.6.7", features = ["derive"] }
+hickory-proto = { version = "0.26.3", default-features = false, features = ["std"] }
+humantime-serde = "1.1.1"
+rand = "0.10"
+# native-tls = SChannel no Windows. Evita ring/aws-lc (Apache-2.0 / OpenSSL),
+# incompatíveis com a GPLv2.
+reqwest = { version = "0.13.5", default-features = false, features = ["native-tls", "http2"] }
+serde = { version = "1.0.229", features = ["derive"] }
+tempfile = "3"
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "net", "time", "signal", "sync", "fs", "io-util"] }
+toml = "1.2.0"
+tracing = "0.1"
+tracing-appender = "0.2.5"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter", "json", "fmt", "ansi"] }
+url = "2.5.8"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

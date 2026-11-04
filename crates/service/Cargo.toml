@@ -1,0 +1,12 @@
+[package]
+name = "argus-service"
+description = "Windows Service do Argus (Fase 3): orquestra DNS, scanner, driver e UI."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+argus-core.workspace = true
+argus-dns.workspace = true

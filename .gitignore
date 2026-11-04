@@ -1,0 +1,12 @@
+/target
+/argus-data
+/argus.toml
+*.log
+# WDK / Visual Studio (driver)
+/driver/**/x64/
+/driver/**/.vs/
+/driver/**/*.user
+# UI
+/ui/node_modules
+/ui/dist
+/ui/src-tauri/target

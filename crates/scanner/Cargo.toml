@@ -1,0 +1,11 @@
+[package]
+name = "argus-scanner"
+description = "Scanner do Argus (Fase 2): libclamav via FFI, YARA-X, análise PE e reputação por hash."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+argus-core.workspace = true

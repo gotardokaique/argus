@@ -1,0 +1,119 @@
+# Configuração de exemplo do Argus. Copie para `argus.toml` e ajuste.
+# Todos os campos são opcionais; os valores abaixo são os padrões.
+# Caminhos relativos são resolvidos a partir do diretório deste arquivo.
+
+# Cache de blocklists (e, nas próximas fases, quarentena e assinaturas).
+# Padrão no Windows: %ProgramData%\Argus
+# data_dir = "C:\\ProgramData\\Argus"
+
+[log]
+# Filtro do tracing. Ex.: "info,argus_dns=debug" mostra todas as consultas.
+# A variável RUST_LOG, se definida, tem prioridade.
+level = "info"
+# "pretty" (legível) ou "json" (uma linha por evento) no console.
+format = "pretty"
+# Arquivo JSON com rotação diária (opcional).
+# file = "logs/argus.log"
+
+[dns]
+listen = ["127.0.0.1:53", "[::1]:53"]
+
+# Resposta para domínio bloqueado:
+#   "null_ip"  → A 0.0.0.0 / AAAA :: (conexão falha na hora, sem novas tentativas)
+#   "nxdomain" → domínio inexistente
+blocked_response = "null_ip"
+blocked_ttl = 60
+
+query_timeout = "5s"
+max_concurrent_queries = 1024
+
+# Nomes sem ponto (ex.: "impressora") recebem NXDOMAIN localmente em vez de
+# vazarem para o upstream. Use forward_zones para nomes da rede local.
+forward_single_label = false
+
+# Allowlist: prioridade sobre todas as blocklists. Cada entrada libera também
+# os subdomínios. Ex.: ["exemplo.com.br", "cdn.algum-servico.net"]
+allowlist = []
+
+[dns.upstream]
+timeout = "3s"          # por tentativa, antes de cair para o próximo servidor
+failure_backoff = "30s" # servidor que falhou vai para o fim da fila por este tempo
+
+# Ordem = preferência. `bootstrap` é obrigatório para URLs com nome de host.
+[[dns.upstream.servers]]
+name = "quad9"
+url = "https://dns.quad9.net/dns-query"
+bootstrap = ["9.9.9.9", "149.112.112.112", "2620:fe::fe", "2620:fe::9"]
+
+[[dns.upstream.servers]]
+name = "cloudflare-security"
+url = "https://security.cloudflare-dns.com/dns-query"
+bootstrap = ["1.1.1.2", "1.0.0.2", "2606:4700:4700::1112", "2606:4700:4700::1002"]
+
+[dns.cache]
+enabled = true
+max_entries = 10000
+min_ttl = 0
+max_ttl = 86400
+negative_max_ttl = 3600
+
+[dns.blocklists]
+update_interval = "6h"
+retry_interval = "15m"
+max_download_mb = 64
+
+# Definir qualquer [[dns.blocklists.sources]] substitui a lista padrão inteira.
+# Formatos: "hosts", "domains", "urls".
+
+# URLhaus (abuse.ch, CC0) filtrado pelo projeto malware-filter, que remove
+# domínios populares para reduzir falsos positivos. Licença: CC0/MIT.
+[[dns.blocklists.sources]]
+name = "urlhaus-filter"
+urls = [
+  "https://malware-filter.gitlab.io/malware-filter/urlhaus-filter-hosts.txt",
+  "https://curbengh.github.io/malware-filter/urlhaus-filter-hosts.txt",
+  "https://malware-filter.pages.dev/urlhaus-filter-hosts.txt",
+]
+format = "hosts"
+
+# Phishing (OpenPhish, PhishTank, IPThreat) via malware-filter. Licença: CC BY-SA 4.0.
+[[dns.blocklists.sources]]
+name = "phishing-filter"
+urls = [
+  "https://malware-filter.gitlab.io/malware-filter/phishing-filter-hosts.txt",
+  "https://curbengh.github.io/malware-filter/phishing-filter-hosts.txt",
+  "https://malware-filter.pages.dev/phishing-filter-hosts.txt",
+]
+format = "hosts"
+
+# Phishing Army: gratuito para uso pessoal e individual.
+[[dns.blocklists.sources]]
+name = "phishing-army"
+urls = ["https://phishing.army/download/phishing_army_blocklist.txt"]
+format = "domains"
+
+# OpenPhish Community Feed: SOMENTE uso pessoal, sem redistribuição
+# (https://openphish.com/terms.html). O feed traz URLs; o host de uma URL de
+# phishing às vezes é uma plataforma compartilhada, por isso só o host exato
+# é bloqueado. Habilite apenas se aceitar os termos.
+[[dns.blocklists.sources]]
+name = "openphish"
+enabled = false
+urls = ["https://openphish.com/feed.txt"]
+format = "urls"
+match_subdomains = false
+
+# Lista local (um domínio por linha):
+# [[dns.blocklists.sources]]
+# name = "minha-lista"
+# path = "minha-lista.txt"
+# format = "domains"
+
+# Nomes da rede local encaminhados ao roteador (DNS comum, sem DoH):
+# [[dns.forward_zones]]
+# zone = "lan"
+# servers = ["192.168.1.1:53"]
+#
+# [[dns.forward_zones]]
+# zone = "168.192.in-addr.arpa"
+# servers = ["192.168.1.1:53"]

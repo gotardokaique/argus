@@ -1,0 +1,28 @@
+[package]
+name = "argus-dns"
+description = "Filtro DNS local do Argus: resolver com upstream DoH, blocklists e cache."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "argus-dns"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+arc-swap.workspace = true
+argus-core.workspace = true
+clap.workspace = true
+hickory-proto.workspace = true
+rand.workspace = true
+reqwest.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+url.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
